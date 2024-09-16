@@ -16,22 +16,64 @@ function esImagenValida($tmpName) {
     return in_array($fileInfo['mime'], $allowedTypes);
 }
 
-// Función para redimensionar la imagen
+/**
+ * Redimensiona una imagen manteniendo su proporción original.
+ *
+ * Esta función toma una imagen de origen, la redimensiona a un ancho específico
+ * manteniendo su relación de aspecto, y guarda la imagen resultante en la ubicación
+ * especificada. Soporta formatos JPEG, PNG y GIF.
+ *
+ * @param string $sourcePath  Ruta completa a la imagen de origen.
+ * @param string $targetPath  Ruta completa donde se guardará la imagen redimensionada.
+ * @param int    $targetWidth Ancho deseado para la imagen redimensionada en píxeles.
+ *
+ * @throws RuntimeException Si no se puede crear o procesar la imagen.
+ *
+ * @return void
+ */
 function redimensionarImagen($sourcePath, $targetPath, $targetWidth) {
+    //getimagesize() devuelve las dimensiones y el tipo de la imagen original
     list($width, $height, $type) = getimagesize($sourcePath);
+    //calcula la proporción y la altura basándose en el ancho deseado
     $ratio = $targetWidth / $width;
     $targetHeight = $height * $ratio;
 
+    //imagecreatefromstring() crea una imagen en memoria a partir del archivo original
     $sourceImage = imagecreatefromstring(file_get_contents($sourcePath));
+    //imagecreatetruecolor() crea una imagen en blanco con las dimensiones calculadas
     $targetImage = imagecreatetruecolor($targetWidth, $targetHeight);
 
+    //imagecopyresampled() redimensiona la imagen original y la copia en la nueva imagen
+    /**
+     * Argumentos: 
+     * $targetImage - La imagen de destino, la nueva imagen redimensionada
+     * $sourceImage - La imagen original
+     * 0 - La coordenada X del punto de destino donde empezar a copiar en la imagen de destino
+     * 0 - La coordenada y del punto de destino donde empezar a copiar en la imagen de destino
+     * 0 - La coordenada x del punto de origen donde empezar a copiar desde la imagen de origen
+     * 0 - La coordenada y del punto de origen donde empezar a copiar desde la imagen de origen
+     * $targetWidth - Ancho de la región de destino
+     * $targetHeight - Alto de la región de destino
+     * $width - Ancho de la región de origen
+     * $height - Altura de la región de origen
+     * Copia toda la imagen de origen $sourceImage a la imagen de destino $targetImage
+     * empezando desde la esquina superior izquierda de ambas imágenes y redimensionándola al nuevo tamaño $targetWidth y $targetHeight
+     */
     imagecopyresampled($targetImage, $sourceImage, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
 
+    //dependiendo del tipo de la imagen original, guarda la nueva imagen redimensionada en el formato correspondiente
     switch ($type) {
         case IMAGETYPE_JPEG:
+            //crea una imagen jpeg a partir de una imagen en memoria
+            //$targetImage es la imagen que quieres guardar
+            //$targetPath es la ruta y el nombre de archivo donde se guardará la imagen
+            //90 representa la calidad de la imagen en una escala de 0 a 100
+            //el valor por defecto es 75
             imagejpeg($targetImage, $targetPath, 90);
             break;
         case IMAGETYPE_PNG:
+            //9 es el mayor nivel de compresión en una escala de 0 a 9
+            //el formato png no pierde calidad al comprimirse
             imagepng($targetImage, $targetPath, 9);
             break;
         case IMAGETYPE_GIF:
@@ -39,6 +81,7 @@ function redimensionarImagen($sourcePath, $targetPath, $targetWidth) {
             break;
     }
 
+    //libera la memoria utilizada por las imágenes temporales
     imagedestroy($sourceImage);
     imagedestroy($targetImage);
 }
