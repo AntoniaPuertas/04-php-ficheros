@@ -39,6 +39,9 @@ function redimensionarImagen($sourcePath, $targetPath, $targetWidth) {
     $targetHeight = $height * $ratio;
 
     //imagecreatefromstring() crea una imagen en memoria a partir del archivo original
+    //esta función forma parte de la biblioteca GD de PHP que se utiliza para crear y manipular imágenes
+    //si PHP no reconoce esta función es posible que la extensión no esté habilitada
+    //para habilitarla en php.ini hay que descomentar la línea extension=gd
     $sourceImage = imagecreatefromstring(file_get_contents($sourcePath));
     //imagecreatetruecolor() crea una imagen en blanco con las dimensiones calculadas
     $targetImage = imagecreatetruecolor($targetWidth, $targetHeight);
